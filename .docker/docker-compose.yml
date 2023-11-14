@@ -1,0 +1,35 @@
+version: "3"
+services:
+    apache:
+        image: "docker-registry.poweredbyproctors.co.uk:5000/apache/2.4:latest"
+        networks:
+            - internal
+            - local_dev_reverse_proxy
+        volumes:
+            - "..:/var/www/public:delegated"
+        env_file: ../.env
+    php:
+        image: "docker-registry.poweredbyproctors.co.uk:5000/php/8.1:latest"
+        networks:
+            - internal
+            - local_dev_mysql_80
+        volumes:
+            - "..:/var/www/public:delegated"
+        external_links:
+            - local_dev_mysql_80
+        environment:
+            - PHP_IDE_CONFIG=serverName=wordpress
+            - XDEBUG_CONFIG=idekey=PHPSTORM
+    memcached:
+        image: "memcached:1.4"
+        networks:
+            - internal
+networks:
+    local_dev_reverse_proxy:
+        external:
+            name: local_dev_reverse_proxy
+    local_dev_mysql_80:
+        external:
+            name: local_dev_mysql_80
+    internal:
+        driver: bridge
